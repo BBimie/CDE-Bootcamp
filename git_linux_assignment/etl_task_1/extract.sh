@@ -1,12 +1,14 @@
 #!/bin/bash
 
-# Load environment variables from .env file
-if [ -f .env ]; then
-  source .env
+# load environment variables from .env file
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+if [ -f "$SCRIPT_DIR/.env" ]; then
+  source "$SCRIPT_DIR/.env"
 else
   echo ".env file not found!"
   exit 1
 fi
+
 
 # Variables,
 CSV_URL="${CSV_URL}"
