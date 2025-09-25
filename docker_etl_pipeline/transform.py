@@ -1,26 +1,19 @@
 from datetime import datetime, timezone
-import json
+from extract import ExtractWeatherData
+import logging
 
 class TransformWeatherData:
     def __init__(self):
-        pass
+        self.extracted_weather_data = ExtractWeatherData().extract()
 
     def transform(self, city_data):
+
         """ This is what a typical city weather data looks like.
             {'coord': {'lon': 7.4896, 'lat': 5.5263},
-            'weather': [{'id': 804,
-                'main': 'Clouds',
-                'description': 'overcast clouds',
-                'icon': '04n'}],
+            'weather': [{'id': 804,'main': 'Clouds', 'description': 'overcast clouds', 'icon': '04n'}],
             'base': 'stations',
-            'main': {'temp': 21.34,
-                'feels_like': 22.11,
-                'temp_min': 21.34,
-                'temp_max': 21.34,
-                'pressure': 1015,
-                'humidity': 99,
-                'sea_level': 1015,
-                'grnd_level': 997},
+            'main': {'temp': 21.34, 'feels_like': 22.11, 'temp_min': 21.34, 'temp_max': 21.34, 'pressure': 1015,
+                'humidity': 99, 'sea_level': 1015, 'grnd_level': 997},
             'visibility': 10000,
             'wind': {'speed': 0.51, 'deg': 291, 'gust': 0.56},
             'clouds': {'all': 98},
@@ -32,7 +25,8 @@ class TransformWeatherData:
             'cod': 200} 
         """
         try:
-            #SELECT KEY INFORMATION
+            #select important information
+            #flattening the data
             transformed_record = {
                 "city_id": city_data['id'],
                 "city_name": city_data['name'],
@@ -43,7 +37,7 @@ class TransformWeatherData:
                 "max_temperature_celsius": city_data['main']['temp_max'],
                 "humidity_percent": city_data['main']['humidity'],
                 "pressure_hpa": city_data['main']['pressure'],
-                "visibility_meters": city_data.get('visibility'), # .get() for safety
+                "visibility_meters": city_data.get('visibility'),
                 "wind_speed_ms": city_data['wind']['speed'],
                 "wind_direction_deg": city_data['wind']['deg'],
                 "weather_condition": city_data['weather'][0]['main'],
@@ -60,20 +54,22 @@ class TransformWeatherData:
             transformed_record["sunrise_utc"] = sunrise_dt.strftime('%Y-%m-%d %H:%M:%S')
             transformed_record["sunset_utc"] = sunset_dt.strftime('%Y-%m-%d %H:%M:%S')
 
+            return transformed_record
+
         except (KeyError, IndexError, TypeError) as e:
             # If any expected key is missing or the data format is wrong, skip this record.
             city_name = city_data.get('name', 'Unknown City')
-            print(f"Warning: Could not transform data for '{city_name}'. Error: {e}. Skipping record.")
+            logging.info(f"Warning: Could not transform data for '{city_name}'. Error: {e}. Skipping record.")
             return None
         
-    def run_transform(self, weather_data):
+    def run_transform(self,):
         transformed_weather_data = []
         
-        for city_data in weather_data:
+        for city_data in self.extracted_weather_data:
             transformed_city = self.transform(city_data)
-            if transformed_city:  # Only append if the transformation was successful
+            if transformed_city:
                 transformed_weather_data.append(transformed_city)
 
-        print(f"Transformation complete. Successfully transformed {len(transformed_weather_data)} records.")
-        return transformed_weather_data
+        logging.info(f"Transformation complete. Successfully transformed {len(transformed_weather_data)} records.")
 
+        return transformed_weather_data

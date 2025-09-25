@@ -1,10 +1,9 @@
 import os
-from datetime import date
 from dotenv import load_dotenv
 import os
 import requests
-import json
-import gzip
+import logging
+
 
 load_dotenv()
 
@@ -14,13 +13,9 @@ class ExtractWeatherData:
     A class to extract weather data for Nigerian capital cities
     from the OpenWeatherMap API.
     """
-    def __init__(self, date=False):
+    def __init__(self,):
         self.api_key = os.environ["API_KEY"]
         self.base_url = "https://api.openweathermap.org/data/2.5/weather"
-        self.city_list_url = "http://bulk.openweathermap.org/sample/city.list.json.gz"
-        self.city_list_path_gz = "docker_etl_pipeline/utils/city_list.json.gz"
-        self.city_list_path_json = "docker_etl_pipeline/utils/city_list.json"
-        self.date = date
 
     def _get_capital_cities(self) -> list:
         return [
@@ -34,16 +29,16 @@ class ExtractWeatherData:
 
     def extract(self) -> list:
         capital_names = self._get_capital_cities()
-        print(f"Fetching 5-day weather forecast for {len(capital_names)} Nigerian capital cities...")
+        logging.info(f"Fetching 5-day weather forecast for {len(capital_names)} Nigerian capital cities...")
 
         weather_data = []
-        for name in capital_names:
+        for name in capital_names[:3]:
             city_query = f"{name},NG"
 
             params = {
                 'q': city_query,
                 'appid': self.api_key,
-                'units': 'metric'  # Get temperature in Celsius
+                'units': 'metric'  #temperature in Celsius
             }
 
             try:
@@ -52,18 +47,14 @@ class ExtractWeatherData:
                 
                 # The entire JSON forecast data for the city is appended.
                 weather_data.append(response.json())
-                print(f"Successfully fetched data for: {name}")
+                logging.info(f"Successfully fetched data for: {name}")
 
             except requests.exceptions.RequestException as e:
-                print(f"Could not fetch weather data for {name}. Error: {e}")
+                logging.info(f"Could not fetch weather data for {name}. Error: {e}")
 
         if weather_data:
-            print(f"\nSuccessfully extracted data for {len(weather_data)} cities.")
+            logging.info(f"\nSuccessfully extracted data for {len(weather_data)} cities.")
         else:
-            print("\nExtraction finished, but no data was fetched. Please check the errors above.")
-
-        print(weather_data)
+            logging.info("\nExtraction finished, but no data was fetched. Please check the errors above.")
 
         return weather_data
-
-ExtractWeatherData().extract()
