@@ -1,51 +1,69 @@
-import requests
-import pandas as pd
-import sqlite3
 import os
-from datetime import datetime
+from datetime import date
 from dotenv import load_dotenv
+import os
+import requests
+import json
+import gzip
 
 load_dotenv()
 
-API_KEY = os.environ["API_KEY"]
-URL = f"http://api.openweathermap.org/data/2.5/weather?q={CITY}&appid={API_KEY}&units=metric"
-
 
 class ExtractWeatherData:
-    def __init__(self):
-        pass
+    """
+    A class to extract weather data for Nigerian capital cities
+    from the OpenWeatherMap API.
+    """
+    def __init__(self, date=False):
+        self.api_key = os.environ["API_KEY"]
+        self.base_url = "https://api.openweathermap.org/data/2.5/weather"
+        self.city_list_url = "http://bulk.openweathermap.org/sample/city.list.json.gz"
+        self.city_list_path_gz = "docker_etl_pipeline/utils/city_list.json.gz"
+        self.city_list_path_json = "docker_etl_pipeline/utils/city_list.json"
+        self.date = date
 
-    def _down_city_json(self):
-        pass
+    def _get_capital_cities(self) -> list:
+        return [
+            "Umuahia", "Yola", "Uyo", "Awka", "Bauchi", "Yenagoa", "Makurdi",
+            "Maiduguri", "Calabar", "Asaba", "Abakaliki", "Benin", "Ado-Ekiti",
+            "Enugu", "Gombe", "Owerri", "Dutse", "Kaduna", "Kano", "Katsina",
+            "Birnin Kebbi", "Lokoja", "Ilorin", "Ikeja", "Lafia", "Minna",
+            "Abeokuta", "Akure", "Oshogbo", "Ibadan", "Jos", "Port Harcourt",
+            "Sokoto", "Jalingo", "Damaturu", "Gusau", "Abuja"
+        ]
 
-    def capital_cities(self) -> list:
-        cities = [ "Umuahia", "Yola", "Uyo", "Awka", "Bauchi", "Yenagoa", "Makurdi", "Maiduguri", "Calabar", "Asaba", "Abakaliki", "Benin City", "Ado Ekiti", "Enugu", "Abuja", "Gombe", "Owerri", "Dutse", "Kaduna", "Kano", "Katsina", "Birnin Kebbi", "Lokoja", "Ilorin", "Ikeja", "Lafia", "Minna", "Abeokuta", "Akure", "Oshogbo", "Ibadan", "Jos", "Port Harcourt", "Sokoto", "Jalingo", "Damaturu", "Gusau", "Abuja"]
-        return cities
+    def extract(self) -> list:
+        capital_names = self._get_capital_cities()
+        print(f"Fetching 5-day weather forecast for {len(capital_names)} Nigerian capital cities...")
 
-def extract():
-    response = requests.get(URL)
-    response.raise_for_status()
-    return response.json()
+        weather_data = []
+        for name in capital_names:
+            city_query = f"{name},NG"
 
-def transform(data):
-    record = {
-        "city": data["name"],
-        "temperature": data["main"]["temp"],
-        "humidity": data["main"]["humidity"],
-        "wind_speed": data["wind"]["speed"],
-        "weather": data["weather"][0]["description"],
-        "timestamp": datetime.utcfromtimestamp(data["dt"])
-    }
-    return record
+            params = {
+                'q': city_query,
+                'appid': self.api_key,
+                'units': 'metric'  # Get temperature in Celsius
+            }
 
-def load(record):
-    conn = sqlite3.connect("weather.db")
-    df = pd.DataFrame([record])
-    df.to_sql("weather", conn, if_exists="append", index=False)
-    conn.close()
+            try:
+                response = requests.get(self.base_url, params=params)
+                response.raise_for_status()
+                
+                # The entire JSON forecast data for the city is appended.
+                weather_data.append(response.json())
+                print(f"Successfully fetched data for: {name}")
 
-if __name__ == "__main__":
-    raw = extract()
-    cleaned = transform(raw)
-    load(cleaned)
-    print("ETL complete:", cleaned)
+            except requests.exceptions.RequestException as e:
+                print(f"Could not fetch weather data for {name}. Error: {e}")
+
+        if weather_data:
+            print(f"\nSuccessfully extracted data for {len(weather_data)} cities.")
+        else:
+            print("\nExtraction finished, but no data was fetched. Please check the errors above.")
+
+        print(weather_data)
+
+        return weather_data
+
+ExtractWeatherData().extract()
