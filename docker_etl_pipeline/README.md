@@ -57,6 +57,15 @@ After running successfully, you can connect to the DB and run \
 AND \
 `SELECT * FROM weather_readings;`
 
+**Project Concepts**
+- Docker Networks
+- Automation with bash scripting
+- Database Schema Design
+- Data extraction from API etc
 
 
-
+**Possible Additions**
+- Integrate a lightweight web framework (e.g., Flask or FastAPI) to expose the ETL as an API service  ( Containerize the API service separately for cleaner architecture )
+- Extend the project to fetch weather data dynamically for any city provided as input (not just Nigerian state capitals)  
+- Add scheduling with tools like Cron or Airflow for automated, recurring ETL runs  
+- Implement logging and error handling for better observability
