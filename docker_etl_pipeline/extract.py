@@ -32,7 +32,7 @@ class ExtractWeatherData:
         logging.info(f"Fetching 5-day weather forecast for {len(capital_names)} Nigerian capital cities...")
 
         weather_data = []
-        for name in capital_names[:3]:
+        for name in capital_names:
             city_query = f"{name},NG"
 
             params = {
