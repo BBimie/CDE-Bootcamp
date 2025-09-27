@@ -4,6 +4,21 @@
 This project implements a containerized ETL pipeline to collect and store weather data for Nigeria’s 36 state capitals and the FCT
 
 
+### Project Structure
+```
+docker_etl_pipeline/
+│
+├── assets/          #ERD & ARD
+├── .gitignore
+├── Dockerfile
+├── extract.py
+├── transform.py
+├── load.py
+├── requirements.txt
+├── run_etl.sh       #ETL Orchestration
+└── README.md
+```
+
 ### Components
 1. **Data Source**: [OpenWeather API](https://api.openweathermap.org/data/2.5/weather)
 2. **ETL**: Extracts weather data, transforms it, and retains clean, important information
