@@ -12,7 +12,7 @@ This project implements a containerized ETL pipeline to collect and store weathe
 5. **Orchestration**: Bash scripting
 
 ### Architecture Diagram
-<img src=docker_etl_pipeline/assets/achitecturaldiagram.png>
+<img src="docker_etl_pipeline/assets/achitecturaldiagram.png">
 
 #### Steps
 
@@ -22,7 +22,7 @@ This project implements a containerized ETL pipeline to collect and store weathe
    - **Load**: Database schema designed to match data structure, then load data  
 
    - **ERD**  
-   <img src=docker_etl_pipeline/assets/erd.png>
+   <img src="docker_etl_pipeline/assets/erd.png">
 
 2. **ETL Orchestration with `run_etl.sh`**  
    - Uses DB & network credentials provided in the `.env` file  
