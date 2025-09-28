@@ -1,7 +1,9 @@
 # OpenweatherAPI ETL Pipeline with Docker and PostgreSQL
 
 ### Objective
-This project implements a containerized ETL pipeline to collect and store weather data for Nigeria’s 36 state capitals and the FCT
+This project implements a containerised ETL pipeline to collect and store weather data for Nigeria’s 36 state capitals and the FCT.
+
+I wrote an article about this project, [here](https://bimie.medium.com/building-a-fully-automated-etl-pipeline-with-python-docker-and-a-bash-script-a970789bb3a9?source=friends_link&sk=bba512556128f426ca1ad27d7bcc38c2).
 
 
 ### Components
