@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database Service
+  db:
+    image: postgres:15 #official Postgres image from Docker Hub
+    restart: always
+
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+
+    ports:
+      - "5432:5432" #expose port to localhost
+
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+
+  # Python Extractor Service
+  extractor:
+    build: ./extractor # build image from the defined extractor/Dockerfile
+    image: annual_enterprise_survey_2023_extractor:latest
+    restart: on-failure
+
+    environment:
+      DB_HOST: ${DB_HOST}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME}
+
+    depends_on:
+      - db # has to wait for the 'db' service to be healthy before starting
+
+  # DBT Transformer Service
+  dbt:
+    build: ./dbt_project # build image from the dbt_project/Dockerfile
+    image: annual_enterprise_survey_2023_dbt:latest
+    restart: on-failure
+
+    environment:
+      DB_HOST: ${DB_HOST}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME}
+
+    depends_on:
+      - extractor # Wait for the 'extractor' service to finish before starting
+
+volumes:
+  pg_data: # the named volume for Postgres data persistence
