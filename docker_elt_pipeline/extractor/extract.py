@@ -8,13 +8,13 @@ import logging
 
 load_dotenv()
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.INFO, )
 
 class Extractor:
     
     def __init__(self):
         self.url = os.environ['CSV_URL']
-        self.DB_HOST =  os.environ["DB_HOST"]
+        self.DB_HOST =  os.getenv("DB_HOST", "localhost")
         self.DB_USER = os.environ["DB_USER"]
         self.DB_PASSWORD = os.environ["DB_PASSWORD"]
         self.DB_NAME = os.environ["DB_NAME"]
@@ -61,3 +61,7 @@ class Extractor:
         except Exception as e:
             logging.error(f"Failed to load data into the database. Error: {e}")
             raise
+
+if __name__ == "__main__":
+    extractor = Extractor()
+    extractor.load()

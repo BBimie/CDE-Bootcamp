@@ -8,7 +8,7 @@ WORKDIR /dbt
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy the entire dbt project (dbt_project.yml, profiles.yml, models/, etc.)
+# Copy the entire dbt project (dbt.yml, profiles.yml, models/, etc.)
 # into the container's working directory.
 COPY . .
 

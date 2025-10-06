@@ -14,4 +14,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 # This is the command that will run when the container starts
-CMD ["python", "extract_load.py"]
+CMD ["python", "extract.py"]

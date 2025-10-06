@@ -1,13 +1,11 @@
 
-# top-level key MUST match the 'profile' from dbt_project.yml
+# top-level key MUST match the 'profile' from dbt.yml
 enterprise_survey_elt_pipeline:
   target: dev
   outputs:
     dev:
       type: postgres
-      # This is the magic: dbt uses Jinja templating `{{...}}` to read
-      # environment variables that we pass from docker-compose.yml.
-      # This keeps your credentials secure and out of the code.
+      # fetch environment variables from docker-compose.yml.
       host: "{{ env_var('DB_HOST') }}"
       user: "{{ env_var('DB_USER') }}"
       password: "{{ env_var('DB_PASSWORD') }}"

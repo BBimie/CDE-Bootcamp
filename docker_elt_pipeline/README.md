@@ -15,9 +15,9 @@ elt-pipeline/
 │   ├── extract.py
 │   └── requirements.txt
 │
-└── dbt_project/
+└── dbt/
     ├── Dockerfile
-    ├── dbt_project.yml
+    ├── dbt.yml
     ├── profiles.yml
     ├── requirements.txt
     └── models/

@@ -1,7 +1,7 @@
 version: 2
 
 sources:
-  - name: raw_data
+  - name: "{{ env_var('DB_NAME') }}"
     schema: public
     tables:
       - name: enterprise_survey_2023
