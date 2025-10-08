@@ -54,9 +54,23 @@ services:
     depends_on:
       - enterprise_survey_extractor # Wait for the 'extractor' service to finish before starting
 
+  # Streamlit Dashboard Service
+  enterprise_survey_dashboard:
+    build: ./dashboard
+    image: enterprise_survey_dashboard:latest
+    ports:
+      - "8502:8501"
+    environment:
+      DB_HOST: enterprise_survey_db
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME}
+    
+    env_file:
+      - .env
+      
+    depends_on:
+      - enterprise_survey_dbt
+
 volumes:
   pg_data: # the named volume for Postgres data persistence
-
-# # networks:
-# #   ${PROJECT_NETWORK}:
-# #     driver: bridge

@@ -53,6 +53,10 @@ class Extractor:
             # Load data into the database
             table_name = 'enterprise_survey_2023'
 
+            # 🚨 Drop table and any dependent views before reloading
+            logging.info(f"Dropping existing table '{table_name}' with CASCADE...")
+            conn.execute(sqlalchemy.text(f"DROP TABLE IF EXISTS {table_name} CASCADE;"))
+
             df.to_sql(name=table_name, con=conn, if_exists='replace', index=False)
             
             conn.close()
