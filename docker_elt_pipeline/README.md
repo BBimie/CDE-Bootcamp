@@ -68,7 +68,7 @@ To Stop and Clean Up
 
 
 ### Project Directory Overview
-    ```
+
     elt-pipeline/
     ├── docker-compose.yml
     ├── .env (you have to create this yourself before running)
@@ -95,5 +95,4 @@ To Stop and Clean Up
         ├── Dockerfile
         ├── requirements.txt
         └── streamlit_dashboard.py
-    ```
 
