@@ -1,8 +1,6 @@
-import requests
 import pandas as pd
-from io import StringIO
 from dotenv import load_dotenv
-import sqlalchemy
+from sqlalchemy import create_engine, text
 import os
 import logging
 
@@ -40,26 +38,24 @@ class Extractor:
 
     def _connect_db(self):
         logging.info("Establishing database connection...")
-        self.engine = sqlalchemy.create_engine(f"postgresql+psycopg2://{self.DB_USER}:{self.DB_PASSWORD}@{self.DB_HOST}/{self.DB_NAME}")
+        self.engine = create_engine(f"postgresql+psycopg2://{self.DB_USER}:{self.DB_PASSWORD}@{self.DB_HOST}/{self.DB_NAME}")
             
 
     def load(self,):
         df = self.extract()
-        
+    
         logging.info("Starting data loading process...")
         try:
-            conn = self.engine.connect()
-
-            # Load data into the database
             table_name = 'enterprise_survey_2023'
 
-            # 🚨 Drop table and any dependent views before reloading
-            logging.info(f"Dropping existing table '{table_name}' with CASCADE...")
-            conn.execute(sqlalchemy.text(f"DROP TABLE IF EXISTS {table_name} CASCADE;"))
+            with self.engine.begin() as conn:
+                # Drop table and dependent views
+                logging.info(f"Dropping existing table '{table_name}' with CASCADE...")
+                conn.execute(text(f"DROP TABLE IF EXISTS {table_name} CASCADE;"))
 
-            df.to_sql(name=table_name, con=conn, if_exists='replace', index=False)
-            
-            conn.close()
+                # Load data into the database
+                df.to_sql(name=table_name, con=conn, if_exists='replace', index=False)
+
             logging.info(f"Data loaded into table '{table_name}' successfully.")
 
         except Exception as e:

@@ -20,8 +20,8 @@ services:
 
   # Python Extractor Service
   enterprise_survey_extractor:
-    build: ./extractor # build image from the defined extractor/Dockerfile
-    image: annual_enterprise_survey_2023_extractor:latest
+    image: bimiewoodcore/annual_enterprise_survey_2023_extractor:latest
+    container_name: enterprise_survey_extractor_container
     restart: on-failure
 
     environment:
@@ -38,9 +38,13 @@ services:
 
   # DBT Transformer Service
   enterprise_survey_dbt:
-    build: ./dbt # build image from the dbt/Dockerfile
-    image: annual_enterprise_survey_2023_dbt:latest
+    image: bimiewoodcore/annual_enterprise_survey_2023_dbt:latest
+    container_name: enterprise_survey_dbt_container
     restart: on-failure
+
+    #tell dbt to sleep for 10 seconds so that the extract and load process runs successfully
+    command: >
+      bash -c "sleep 10 && dbt run"
 
     env_file:
       - .env
@@ -56,8 +60,8 @@ services:
 
   # Streamlit Dashboard Service
   enterprise_survey_dashboard:
-    build: ./dashboard
-    image: enterprise_survey_dashboard:latest
+    image: bimiewoodcore/enterprise_survey_dashboard:latest
+    container_name: enterprise_survey_dashboard_container
     ports:
       - "8502:8501"
     environment:
