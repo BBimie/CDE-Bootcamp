@@ -1,0 +1,15 @@
+
+# top-level key MUST match the 'profile' from dbt.yml
+enterprise_survey_elt_pipeline:
+  target: dev
+  outputs:
+    dev:
+      type: postgres
+      # fetch environment variables from docker-compose.yml.
+      host: "{{ env_var('DB_HOST') }}"
+      user: "{{ env_var('DB_USER') }}"
+      password: "{{ env_var('DB_PASSWORD') }}"
+      port: 5432
+      dbname: "{{ env_var('DB_NAME') }}"
+      schema: public
+      threads: 4 # Number of parallel queries dbt can run

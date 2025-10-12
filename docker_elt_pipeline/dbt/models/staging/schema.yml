@@ -1,0 +1,28 @@
+version: 2
+
+sources:
+  - name: "{{ env_var('DB_NAME') }}"
+    schema: public
+    tables:
+      - name: enterprise_survey_2023
+
+models:
+  # name must match the .sql model file
+  - name: enterprise_table_transforms
+    description: "Selects only import columns; carries out column renaming, and data type standardixation for the value column."
+
+    columns:
+      - name: survey_year
+        description: "The year the survey data was recorded."
+        tests:
+          - not_null
+
+      - name: industry_code
+        description: "The unique code for the industry."
+        tests:
+          - not_null
+
+      - name: value
+        description: "The standardized value of the metric in either dollars or decimal percentage."
+        tests:
+          - not_null

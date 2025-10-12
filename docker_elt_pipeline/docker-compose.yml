@@ -1,0 +1,80 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database Service
+  enterprise_survey_db:
+    image: postgres:15 #official Postgres image from Docker Hub
+    container_name: enterprise_survey_db_container
+    restart: always
+
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+
+    ports:
+      - "5434:5432" #expose port to localhost
+
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+
+  # Python Extractor Service
+  enterprise_survey_extractor:
+    image: bimiewoodcore/annual_enterprise_survey_2023_extractor:latest
+    container_name: enterprise_survey_extractor_container
+    restart: on-failure
+
+    environment:
+      DB_HOST: enterprise_survey_db
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME}
+
+    env_file:
+      - .env
+
+    depends_on:
+      - enterprise_survey_db # has to wait for the database service to be healthy before starting
+
+  # DBT Transformer Service
+  enterprise_survey_dbt:
+    image: bimiewoodcore/annual_enterprise_survey_2023_dbt:latest
+    container_name: enterprise_survey_dbt_container
+    restart: on-failure
+
+    #tell dbt to sleep for 10 seconds so that the extract and load process runs successfully
+    command: >
+      bash -c "sleep 10 && dbt run"
+
+    env_file:
+      - .env
+
+    environment:
+      DB_HOST: enterprise_survey_db
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME}
+
+    depends_on:
+      - enterprise_survey_extractor # Wait for the 'extractor' service to finish before starting
+
+  # Streamlit Dashboard Service
+  enterprise_survey_dashboard:
+    image: bimiewoodcore/enterprise_survey_dashboard:latest
+    container_name: enterprise_survey_dashboard_container
+    ports:
+      - "8502:8501"
+    environment:
+      DB_HOST: enterprise_survey_db
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME}
+    
+    env_file:
+      - .env
+      
+    depends_on:
+      - enterprise_survey_dbt
+
+volumes:
+  pg_data: # the named volume for Postgres data persistence

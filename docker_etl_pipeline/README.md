@@ -6,6 +6,21 @@ This project implements a containerised ETL pipeline to collect and store weathe
 I wrote an article about this project, [here](https://bimie.medium.com/building-a-fully-automated-etl-pipeline-with-python-docker-and-a-bash-script-a970789bb3a9?source=friends_link&sk=bba512556128f426ca1ad27d7bcc38c2).
 
 
+### Project Structure
+```
+docker_etl_pipeline/
+│
+├── assets/          #ERD & ARD
+├── .gitignore
+├── Dockerfile
+├── extract.py
+├── transform.py
+├── load.py
+├── requirements.txt
+├── run_etl.sh       #ETL Orchestration
+└── README.md
+```
+
 ### Components
 1. **Data Source**: [OpenWeather API](https://api.openweathermap.org/data/2.5/weather)
 2. **ETL**: Extracts weather data, transforms it, and retains clean, important information
