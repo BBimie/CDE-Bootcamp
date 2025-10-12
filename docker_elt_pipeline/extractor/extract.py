@@ -29,7 +29,6 @@ class Extractor:
             file_name = self.url.split("/")[-1]
 
             logging.info(f"{file_name} Data extracted successfully with shape: {df.shape}")
-            df.to_csv(f"data.csv", index=False)
             return df
         
         except Exception as e:
