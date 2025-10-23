@@ -4,3 +4,4 @@ data
 logs
 plugins
 config
+__pycache__*
