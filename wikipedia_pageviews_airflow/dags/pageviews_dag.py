@@ -1,66 +1,49 @@
 from datetime import datetime, timedelta
-from airflow import DAG
-from airflow.operators.python import PythonOperator
+from airflow.sdk import DAG
+from airflow.providers.standard.operators.python import PythonOperator
+from airflow.providers.standard.operators.bash import BashOperator
+from pathlib import Path
+import sys
+import logging
 
-# Import your local pipeline modules
-from scripts.download_pageviews import DownloadPageViews
-from scripts.extract_pageviews import ExtractPageViews
-from scripts.load_pageviews import LoadPageViews
+from scripts.download_pageviews import download_task_callable
+from scripts.extract_pageviews import extract_task_callable
+from scripts.load_pageviews import load_task_callable
 
-default_args = {
-    "owner": "bimbola",
-    "depends_on_past": False,
-    "retries": 1,
-    "retry_delay": timedelta(minutes=2),
-}
+# Set up logging
+logging.basicConfig(level=logging.INFO)
 
-# def run_download(**context):
-#     downloader = DownloadPageViews()
-#     downloader.download_file()
-#     # Save the extracted file path for next task
-#     context["ti"].xcom_push(key="extracted_path", value=str(downloader.extracted_path))
+companies = {
+            'Amazon': 'en Amazon_(company)',
+            'Apple': 'en Apple_Inc.',
+            'Facebook': 'en Facebook',
+            'Google': 'en Google',
+            'Microsoft': 'en Microsoft'
+        }
 
-# def run_extract(**context):
-#     from datetime import datetime
-#     extracted_path = context["ti"].xcom_pull(key="extracted_path")
-#     extractor = ExtractPageViews(extracted_path)
-#     data = extractor.extract()
-#     snapshot_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-#     context["ti"].xcom_push(key="data", value=data)
-#     context["ti"].xcom_push(key="snapshot_datetime", value=snapshot_datetime)
-
-# def run_load(**context):
-#     data = context["ti"].xcom_pull(key="data")
-#     snapshot = context["ti"].xcom_pull(key="snapshot_datetime")
-#     loader = LoadPageViews()
-#     loader.load(data, snapshot)
 
 with DAG(
-    dag_id="wikipedia_pageviews_dag",
-    default_args=default_args,
-    description="Wikipedia Pageviews ETL (Download → Extract → Load)",
-    start_date=datetime(2025, 10, 20),
-    schedule_interval=None,
-    catchup=False,
-) as dag:
-    pass
+    dag_id='wikipedia_pageviews_dag',
+    schedule=None,  # Run manually
+    start_date=datetime(2025, 10, 1),
+    params={
+        "day": 22,
+        "hour": 10,
+        "companies" : companies
+    }
+):
+    
+    download_pageviews_task = PythonOperator(
+        task_id="download",
+        python_callable=download_task_callable
+    )
 
-    # download_task = PythonOperator(
-    #     task_id="download_pageviews",
-    #     python_callable=run_download,
-    #     provide_context=True,
-    # )
-
-    # extract_task = PythonOperator(
-    #     task_id="extract_pageviews",
-    #     python_callable=run_extract,
-    #     provide_context=True,
-    # )
-
-    # load_task = PythonOperator(
-    #     task_id="load_pageviews",
-    #     python_callable=run_load,
-    #     provide_context=True,
-    # )
-
-    # download_task >> extract_task >> load_task
+    extract_pageviews_task = PythonOperator(
+        task_id='extract',
+        python_callable=extract_task_callable)
+    
+    load_pageviews_task = PythonOperator(
+        task_id='load',
+        python_callable=load_task_callable)
+    
+    download_pageviews_task >> extract_pageviews_task >> load_pageviews_task
